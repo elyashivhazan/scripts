@@ -1,0 +1,29 @@
+#!/bin/sh
+
+bm_dir="${XDG_DATA_HOME:-"${HOME}/.local/share"}"
+bm="${bm_dir}/bookmarks"
+[ ! -d "$bm_dir" ] && mkdir -p "${bm_dir}"
+[ ! -f "$bm" ] && touch ${bm}
+
+bm_list() {
+    sed -e '/^$/d' -e '/^#/d' $bm | sort | dmenu
+}
+
+bm_add() {
+    url=$(echo | dmenu -i -p "Enter URL:")
+    des=$(printf "" | dmenu -p "Enter Description:")
+
+    [ -z $url ] && return 1
+    [ -z $des ] && echo "$url" >> $bm && return 0
+    echo "$des - $url" >> $bm
+}
+
+bm_del() {
+    sed -i "/$(bm_list)/d" $bm
+}
+
+case "$1" in
+    add | del) bm_$1 ;;
+    list) bm_list | awk '{print $(NF)}' ;;
+    *) xdg-open "$(bm_list | awk '{print $(NF)}')" ;;
+esac

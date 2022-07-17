@@ -1,0 +1,42 @@
+#!/bin/sh
+
+root_dir="."
+chmod_dir="755"
+chmod_file="644"
+depth="-maxdepth 1"
+
+for arg in "$@"; do
+    case "${1}" in
+        -d)
+            root_dir="${2}"
+            shift
+            ;;
+        -pd)
+            chmod_dir="${2}"
+            shift
+            ;;
+        -pf)
+            chmod_file="${2}"
+            shift
+            ;;
+        -D)
+            [ ! "${2}" == "-1" ] &&
+                depth="-maxdepth ${2}" ||
+                unset depth
+            shift
+            ;;
+        *) shift ;;
+    esac
+done
+
+opts="${root_dir} ${depth}"
+
+for dir in $(find ${opts} -type d); do
+    echo "DIR: ${dir}"
+    chmod "${chmod_dir}" "${dir}"
+done
+
+for file in $(find ${opts} -type f); do
+    echo "FILE: ${file}"
+    chmod "${chmod_file}" "${file}"
+done

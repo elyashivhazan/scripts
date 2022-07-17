@@ -1,0 +1,4 @@
+#!/bin/sh
+
+word="$(echo | dmenu -p "Enter a word:")"
+dym -c "${word}" | dmenu -p "Words:" | tr -d '\n' | xclip -sel clip

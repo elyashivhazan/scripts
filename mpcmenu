@@ -1,0 +1,38 @@
+#!/bin/sh
+
+cmd="list
+shuffle
+next
+prev
+toggle
+clear
+settings"
+cmd="$(printf "${cmd}" | dmenu)"
+
+case "${cmd}" in
+    shuffle | next | prev | toggle | clear)
+        mpc "${cmd}"
+        ;;
+    settings)
+        cmd="repeat: $(mpc status %repeat%)\nrandom: $(mpc status %random%)\nsingle: $(mpc status %single%)\nconsume: $(mpc status %consume%)"
+        cmd="$(printf "${cmd}" | dmenu | awk -F : '{print $1}')"
+        mpc "${cmd}"
+        ;;
+    list)
+        play="$(mpc playlist)"
+        [ -z "$play" ] && {
+            playlist="$(mpc lsplaylist | dmenu)"
+            [ -z "$playlist" ] && echo "No playlist has been chosen" && exit 0
+            mpc clear && mpc add "${playlist}" && mpc play && exit 0
+        } || {
+            IFS=$'\n'
+            playlist="$(mpc playlist)"
+            for song in ${playlist}; do
+                num=$((num + 1))
+                songs="${songs}${num} ${song}\n"
+            done
+            song="$(printf ${songs} | dmenu | awk '{print $1}')"
+            mpc play "${song}"
+        }
+        ;;
+esac
