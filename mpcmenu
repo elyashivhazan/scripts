@@ -1,5 +1,10 @@
 #!/bin/sh
 
+pgrep -x mpd > /dev/null || {
+    ans="$(printf "yes\nno" | dmenu -p "MPD is not running, would you like to start it?")"
+    [ "$ans" = yes ] && mpd || exit 0
+}
+
 cmd="list
 shuffle
 next
@@ -7,7 +12,9 @@ prev
 toggle
 clear
 settings"
-cmd="$(printf "${cmd}" | dmenu)"
+[ -z "$1" ] &&
+    cmd="$(printf "${cmd}" | dmenu)" ||
+    cmd="${1}"
 
 case "${cmd}" in
     shuffle | next | prev | toggle | clear)
@@ -25,13 +32,13 @@ case "${cmd}" in
             [ -z "$playlist" ] && echo "No playlist has been chosen" && exit 0
             mpc clear && mpc add "${playlist}" && mpc play && exit 0
         } || {
-            IFS=$'\n'
+            IFS=$(printf '\n\t')
             playlist="$(mpc playlist)"
             for song in ${playlist}; do
                 num=$((num + 1))
                 songs="${songs}${num} ${song}\n"
             done
-            song="$(printf ${songs} | dmenu | awk '{print $1}')"
+            song="$(printf "${songs}" | dmenu | awk '{print $1}')"
             mpc play "${song}"
         }
         ;;
