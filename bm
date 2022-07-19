@@ -3,27 +3,30 @@
 bm_dir="${XDG_DATA_HOME:-"${HOME}/.local/share"}"
 bm="${bm_dir}/bookmarks"
 [ ! -d "$bm_dir" ] && mkdir -p "${bm_dir}"
-[ ! -f "$bm" ] && touch ${bm}
+[ ! -f "$bm" ] && touch "${bm}"
 
 bm_list() {
-    sed -e '/^$/d' -e '/^#/d' $bm | sort | dmenu
+    sed -e '/^$/d' -e '/^#/d' "${bm}" | sort
 }
 
 bm_add() {
-    url=$(echo | dmenu -i -p "Enter URL:")
+    url=$(printf "" | dmenu -p "Enter URL:")
     des=$(printf "" | dmenu -p "Enter Description:")
 
-    [ -z $url ] && return 1
-    [ -z $des ] && echo "$url" >> $bm && return 0
-    echo "$des - $url" >> $bm
+    [ -z "$url" ] && return 1
+    [ -z "$des" ] && echo "${url}" >> "${bm}" && return 0
+    echo "${des} - ${url}" >> "${bm}"
 }
 
-bm_del() {
-    sed -i "/$(bm_list)/d" $bm
+bm_delete() {
+    bookmark="$(bm_list | dmenu)"
+    [ -z "$bookmark" ] && return 0
+    tmp="$(sed -e "\|${bookmark}|d" "${bm}")"
+    echo "${tmp}" > "${bm}"
 }
 
-case "$1" in
-    add | del) bm_$1 ;;
-    list) bm_list | awk '{print $(NF)}' ;;
-    *) xdg-open "$(bm_list | awk '{print $(NF)}')" ;;
+cmd="$(printf "add\ndelete\n$(bm_list)\n" | dmenu | awk '{print $(NF)}')"
+case "$cmd" in
+    add | delete) bm_"${cmd}" ;;
+    *) xdg-open "${cmd}" > /dev/null ;;
 esac

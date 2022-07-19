@@ -2,7 +2,7 @@
 
 searche="https://searx.be/search?q=%s"
 
-[ -z $1 ] && exit 1
-choice=$(echo $@ | hexdump -v -e '/1 " %02x"')
+[ -z "$1" ] && exit 1
+choice=$(echo "$@" | hexdump -v -e '/1 " %02x"')
 
-xdg-open $(echo "$searche" | sed "s/%s/${choice% 0a}/;s/[[:space:]]/%/g")
+xdg-open "$(echo "${searche}" | sed "s/%s/${choice% 0a}/;s/[[:space:]]/%/g")"

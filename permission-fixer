@@ -5,7 +5,7 @@ chmod_dir="755"
 chmod_file="644"
 depth="-maxdepth 1"
 
-for arg in "$@"; do
+for _ in "$@"; do
     case "${1}" in
         -d)
             root_dir="${2}"
@@ -20,7 +20,7 @@ for arg in "$@"; do
             shift
             ;;
         -D)
-            [ ! "${2}" == "-1" ] &&
+            [ ! "$2" = "-1" ] &&
                 depth="-maxdepth ${2}" ||
                 unset depth
             shift
@@ -31,12 +31,5 @@ done
 
 opts="${root_dir} ${depth}"
 
-for dir in $(find ${opts} -type d); do
-    echo "DIR: ${dir}"
-    chmod "${chmod_dir}" "${dir}"
-done
-
-for file in $(find ${opts} -type f); do
-    echo "FILE: ${file}"
-    chmod "${chmod_file}" "${file}"
-done
+find ${opts} -type d -exec echo "D: {}" \; -exec chmod "${chmod_dir}" {} \;
+find ${opts} -type f -exec echo "F: {}" \; -exec chmod "${chmod_file}" {} \;
